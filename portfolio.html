@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Portfolio — Access Required</title>
+<style>
+  :root {
+    --purple-50: #EEEDFE;
+    --purple-100: #CECBF6;
+    --purple-400: #7F77DD;
+    --purple-600: #534AB7;
+    --purple-800: #3C3489;
+    --purple-900: #26215C;
+    --teal-50: #E1F5EE;
+    --teal-600: #0F6E56;
+    --coral-50: #FAECE7;
+    --coral-600: #993C1D;
+    --gray-50: #F1EFE8;
+    --gray-100: #D3D1C7;
+    --gray-400: #888780;
+    --gray-600: #5F5E5A;
+    --gray-900: #2C2C2A;
+    --bg: #ffffff;
+    --bg2: #F8F8F6;
+    --text: #2C2C2A;
+    --text2: #5F5E5A;
+    --border: rgba(0,0,0,0.1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg2); color: var(--text); min-height: 100vh; }
+
+  /* ── GATE SCREEN ── */
+  #gate {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  .gate-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    position: relative;
+  }
+  .lock-icon {
+    width: 52px; height: 52px;
+    background: var(--purple-50);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.25rem;
+    font-size: 22px;
+  }
+  .gate-card h1 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+  .gate-card .subtitle { font-size: 14px; color: var(--text2); margin-bottom: 1.75rem; line-height: 1.5; }
+  .gate-card input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    outline: none;
+    transition: border-color 0.2s;
+    background: var(--bg);
+    color: var(--text);
+  }
+  .gate-card input:focus { border-color: var(--purple-400); }
+  .gate-card button {
+    width: 100%;
+    padding: 11px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s;
+  }
+  .btn-purple { background: var(--purple-600); color: #fff; margin-bottom: 8px; }
+  .btn-purple:hover { background: var(--purple-800); }
+  .btn-purple:disabled { background: var(--gray-400); cursor: not-allowed; }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn-outline:hover { background: var(--bg2); }
+  .gate-msg { font-size: 13px; margin-top: 12px; min-height: 18px; }
+  .gate-msg.success { color: var(--teal-600); }
+  .gate-msg.error { color: #A32D2D; }
+  .gate-msg.info { color: var(--purple-600); }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+  #step2 { display: none; }
+
+  /* ── HIDDEN ADMIN PANEL ── */
+  #adminPanel {
+    display: none;
+    background: var(--purple-50);
+    border: 2px solid var(--purple-400);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+  #adminPanel.show { display: block; }
+  #adminPanel .admin-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--purple-800);
+    margin-bottom: 10px;
+  }
+  #adminPanel .otp-code {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--purple-800);
+    letter-spacing: 8px;
+    background: white;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 10px 0;
+    font-family: 'Courier New', monospace;
+  }
+  #adminPanel .otp-timer {
+    font-size: 13px;
+    color: var(--purple-600);
+    margin-top: 8px;
+  }
+  #adminPanel .otp-timer.expired { color: #A32D2D; }
+  .admin-hint {
+    font-size: 11px;
+    color: var(--gray-400);
+    margin-top: 12px;
+    padding: 8px;
+    background: var(--bg);
+    border-radius: 6px;
+    border: 1px dashed var(--border);
+  }
+  .admin-hint strong { color: var(--purple-600); }
+
+  /* ── PORTFOLIO ── */
+  #portfolio { display: none; }
+  .topbar {
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar .brand { 
+    font-size: 15px; 
+    font-weight: 600; 
+    color: var(--purple-600); 
+    cursor: pointer;
+    user-select: none;
+  }
+  .topbar .brand:hover { opacity: 0.8; }
+  .topbar nav { display: flex; gap: 4px; }
+  .topbar nav button {
+    background: transparent;
+    border: none;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: var(--text2);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.15s;
+  }
+  .topbar nav button:hover, .topbar nav button.active { background: var(--purple-50); color: var(--purple-800); }
+  .topbar .logout { font-size: 12px; color: var(--gray-400); cursor: pointer; border: none; background: none; }
+  .topbar .logout:hover { color: var(--text); }
+
+  .main { max-width: 760px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+
+  /* sections */
+  .section { display: none; animation: fadeIn 0.25s ease; }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* hero */
+  .hero { padding: 1rem 0 2rem; }
+  .avatar-large {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: var(--purple-50);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; font-weight: 600; color: var(--purple-800);
+    margin-bottom: 1.25rem;
+  }
+  .hero h1 { font-size: 28px; font-weight: 700; line-height: 1.2; }
+  .hero .role { font-size: 15px; color: var(--purple-600); margin: 6px 0 14px; font-weight: 500; }
+  .hero p { font-size: 14px; color: var(--text2); line-height: 1.75; max-width: 540px; }
+  .pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1rem; }
+  .pill { font-size: 12px; padding: 4px 12px; border-radius: 20px; }
+  .pill.purple { background: var(--purple-50); color: var(--purple-800); }
+  .pill.teal { background: var(--teal-50); color: var(--teal-600); }
+  .pill.coral { background: var(--coral-50); color: var(--coral-600); }
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 1.75rem; }
+  .stat-box { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px; text-align: center; }
+  .stat-box .num { font-size: 22px; font-weight: 700; color: var(--purple-600); }
+  .stat-box .lbl { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+  /* section header */
+  .sec-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; color: var(--gray-400); text-transform: uppercase; margin-bottom: 1rem; }
+
+  /* project cards */
+  .proj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+  .proj-card {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+    padding: 1.25rem; transition: border-color 0.15s;
+  }
+  .proj-card:hover { border-color: var(--purple-400); }
+  .proj-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .proj-card p { font-size: 13px; color: var(--text2); line-height: 1.65; }
+  .proj-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
+  .proj-tag { font-size: 11px; padding: 3px 8px; border-radius: 6px; background: var(--gray-50); color: var(--gray-600); border: 1px solid var(--border); }
+
+  /* skills */
+  .skill-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .skill-box { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .skill-box .sname { font-size: 13px; font-weight: 500; margin-bottom: 8px; display: flex; justify-content: space-between; }
+  .skill-box .sname span { font-size: 12px; color: var(--text2); font-weight: 400; }
+  .bar-bg { height: 5px; background: var(--gray-100); border-radius: 3px; }
+  .bar-fill { height: 5px; border-radius: 3px; background: var(--purple-600); width: 0; transition: width 0.9s cubic-bezier(.4,0,.2,1); }
+
+  /* education */
+  .edu-card { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 10px; display: flex; gap: 14px; align-items: flex-start; }
+  .edu-dot { width: 36px; height: 36px; border-radius: 8px; background: var(--purple-50); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .edu-card h3 { font-size: 14px; font-weight: 600; }
+  .edu-card .school { font-size: 13px; color: var(--text2); margin-top: 2px; }
+  .edu-card .year { font-size: 11px; color: var(--purple-600); background: var(--purple-50); padding: 2px 8px; border-radius: 20px; display: inline-block; margin-top: 6px; }
+  .edu-card .desc { font-size: 12px; color: var(--text2); margin-top: 8px; line-height: 1.6; }
+
+  /* contact */
+  .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .contact-card { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; display: flex; align-items: center; gap: 12px; }
+  .contact-card .icon { width: 36px; height: 36px; border-radius: 8px; background: var(--purple-50); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .contact-card .clabel { font-size: 11px; color: var(--text2); }
+  .contact-card .cval { font-size: 13px; font-weight: 500; margin-top: 2px; }
+
+  /* visitor badge */
+  .visitor-badge {
+    background: var(--purple-50); border: 1px solid var(--purple-100);
+    border-radius: 8px; padding: 10px 14px; font-size: 13px;
+    color: var(--purple-800); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;
+  }
+
+  @media (max-width: 560px) {
+    .topbar { padding: 0 1rem; }
+    .topbar nav button { padding: 6px 8px; font-size: 12px; }
+    .main { padding: 1.5rem 1rem; }
+    .stat-row { grid-template-columns: 1fr 1fr; }
+    #adminPanel .otp-code { font-size: 28px; letter-spacing: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ GATE ═══════════════ -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="lock-icon">🔒</div>
+    <h1>This portfolio is private</h1>
+    <p class="subtitle">Enter your name to request access. Contact the owner to get your OTP.</p>
+
+    <!-- Step 1: enter name -->
+    <div id="step1">
+      <input type="text" id="visitorName" placeholder="Your name" maxlength="60" />
+      <button class="btn-purple" id="requestBtn" onclick="requestAccess()">Request Access</button>
+    </div>
+
+    <!-- Step 2: enter OTP -->
+    <div id="step2">
+      <hr class="divider" />
+      
+      <!-- HIDDEN ADMIN PANEL (appears on triple-click) -->
+      <div id="adminPanel">
+        <div class="admin-title">🔑 Admin - Generate OTP</div>
+        <button class="btn-purple" onclick="generateOTP()" style="margin-bottom: 10px;">Generate New OTP</button>
+        <div id="otpDisplay">
+          <div class="otp-code">------</div>
+          <div class="otp-timer">⏱️ No OTP generated</div>
+        </div>
+        <div class="admin-hint">
+          💡 <strong>Hidden Admin:</strong> Triple-click the lock icon above to show/hide this panel.
+        </div>
+      </div>
+      
+      <p style="font-size:13px; color:var(--text2); margin-bottom:12px;">
+        📱 Contact the owner to get your OTP code.
+      </p>
+      <input type="text" id="passwordInput" placeholder="Enter OTP code" maxlength="6" inputmode="numeric" />
+      <button class="btn-purple" onclick="verifyOTP()">Verify OTP</button>
+      <button class="btn-outline" style="margin-top:6px;" onclick="resetGate()">Start over</button>
+    </div>
+
+    <p class="gate-msg" id="gateMsg"></p>
+  </div>
+</div>
+
+<!-- ═══════════════ PORTFOLIO ═══════════════ -->
+<div id="portfolio">
+  <header class="topbar">
+    <span class="brand" id="brandLogo">YN.</span>
+    <nav>
+      <button class="active" onclick="showTab('about', this)">About</button>
+      <button onclick="showTab('projects', this)">Projects</button>
+      <button onclick="showTab('skills', this)">Skills</button>
+      <button onclick="showTab('education', this)">Education</button>
+      <button onclick="showTab('contact', this)">Contact</button>
+    </nav>
+    <button class="logout" onclick="lockPortfolio()">Lock</button>
+  </header>
+
+  <main class="main">
+
+    <!-- visitor badge -->
+    <div class="visitor-badge" id="visitorBadge">
+      👋 Welcome, <strong id="visitorDisplay" style="margin-left:4px;"></strong>
+    </div>
+
+    <!-- ABOUT -->
+    <div class="section active" id="tab-about">
+      <div class="hero">
+        <div class="avatar-large">YN</div>
+        <h1>Your Name</h1>
+        <div class="role">IT Graduate &nbsp;·&nbsp; Aspiring Developer</div>
+        <p>Fresh graduate with a Bachelor's in Information Technology from Mumbai. Passionate about building web applications and learning new technologies. Eager to contribute to a team and grow as a developer.</p>
+        <div class="pill-row">
+          <span class="pill purple">Web Development</span>
+          <span class="pill teal">Quick Learner</span>
+          <span class="pill coral">Open to Opportunities</span>
+          <span class="pill purple">Mumbai, India</span>
+        </div>
+        <div class="stat-row">
+          <div class="stat-box"><div class="num">3+</div><div class="lbl">Projects built</div></div>
+          <div class="stat-box"><div class="num">8+</div><div class="lbl">Technologies</div></div>
+          <div class="stat-box"><div class="num">2024</div><div class="lbl">IT Graduate</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div class="section" id="tab-projects">
+      <p class="sec-label">Projects</p>
+      <div class="proj-grid">
+        <div class="proj-card">
+          <h3>Student Result Management System</h3>
+          <p>Final year project. A web app for admins to manage and publish student results with grade calculations and PDF export.</p>
+          <div class="proj-tags"><span class="proj-tag">PHP</span><span class="proj-tag">MySQL</span><span class="proj-tag">Bootstrap</span><span class="proj-tag">HTML/CSS</span></div>
+        </div>
+        <div class="proj-card">
+          <h3>Weather App</h3>
+          <p>Fetches real-time weather using OpenWeatherMap API. Shows temperature, humidity, and a 5-day forecast for any city.</p>
+          <div class="proj-tags"><span class="proj-tag">JavaScript</span><span class="proj-tag">REST API</span><span class="proj-tag">CSS</span></div>
+        </div>
+        <div class="proj-card">
+          <h3>To-Do List App</h3>
+          <p>Productivity app with add, delete, and mark-complete. Data persists via localStorage. Fully responsive.</p>
+          <div class="proj-tags"><span class="proj-tag">React</span><span class="proj-tag">localStorage</span><span class="proj-tag">CSS</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SKILLS -->
+    <div class="section" id="tab-skills">
+      <p class="sec-label">Technical skills</p>
+      <div class="skill-grid" id="skillGrid"></div>
+      <p class="sec-label" style="margin-top:1.5rem;">Soft skills</p>
+      <div class="pill-row">
+        <span class="pill purple">Team Collaboration</span>
+        <span class="pill teal">Problem Solving</span>
+        <span class="pill coral">Communication</span>
+        <span class="pill purple">Time Management</span>
+        <span class="pill teal">Adaptability</span>
+      </div>
+    </div>
+
+    <!-- EDUCATION -->
+    <div class="section" id="tab-education">
+      <p class="sec-label">Education</p>
+      <div class="edu-card">
+        <div class="edu-dot">🎓</div>
+        <div>
+          <h3>Bachelor of Science — Information Technology</h3>
+          <div class="school">Your University Name, Mumbai</div>
+          <span class="year">2021 – 2024</span>
+          <p class="desc">Relevant coursework: Data Structures, DBMS, Web Technologies, Computer Networks, Software Engineering, Operating Systems.</p>
+        </div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-dot">📚</div>
+        <div>
+          <h3>Higher Secondary Certificate (HSC)</h3>
+          <div class="school">Your College Name, Mumbai</div>
+          <span class="year">2019 – 2021</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTACT -->
+    <div class="section" id="tab-contact">
+      <p class="sec-label">Get in touch</p>
+      <div class="contact-grid">
+        <div class="contact-card"><div class="icon">✉️</div><div><div class="clabel">Email</div><div class="cval">yourname@email.com</div></div></div>
+        <div class="contact-card"><div class="icon">💼</div><div><div class="clabel">LinkedIn</div><div class="cval">linkedin.com/in/yourname</div></div></div>
+        <div class="contact-card"><div class="icon">🐙</div><div><div class="clabel">GitHub</div><div class="cval">github.com/yourname</div></div></div>
+        <div class="contact-card"><div class="icon">📍</div><div><div class="clabel">Location</div><div class="cval">Mumbai, India</div></div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  /* ══════════════════════════════════════
+     STATE
+  ══════════════════════════════════════ */
+  let currentOTP = "";
+  let otpExpiry = null;
+  let visitorName = "";
+  let clickCount = 0;
+  let clickTimer = null;
+
+  /* ══════════════════════════════════════
+     GATE LOGIC
+  ══════════════════════════════════════ */
+  function requestAccess() {
+    const nameInput = document.getElementById("visitorName");
+    visitorName = nameInput.value.trim();
+    const msg = document.getElementById("gateMsg");
+
+    if (!visitorName) { showMsg("Please enter your name.", "error"); return; }
+
+    document.getElementById("step1").style.display = "none";
+    document.getElementById("step2").style.display = "block";
+    showMsg("Contact the owner to get your OTP.", "info");
+  }
+
+  function generateOTP() {
+    // Generate 6-digit OTP
+    currentOTP = Math.floor(100000 + Math.random() * 900000).toString();
+    otpExpiry = Date.now() + 60000; // 60 seconds
+    
+    // Update display
+    document.getElementById("otpDisplay").innerHTML = `
+      <div class="otp-code">${currentOTP}</div>
+      <div class="otp-timer" id="otpTimer">⏱️ Expires in: <span id="timerDisplay">60</span>s</div>
+    `;
+    
+    showMsg(`✅ OTP generated: ${currentOTP} (valid for 60s)`, "success");
+    
+    // Start countdown
+    startTimer();
+  }
+
+  function startTimer() {
+    const timerDisplay = document.getElementById("timerDisplay");
+    if (!timerDisplay) return;
+    
+    let seconds = 60;
+    const interval = setInterval(() => {
+      seconds--;
+      timerDisplay.textContent = seconds;
+      
+      if (seconds <= 10) {
+        timerDisplay.style.color = "#A32D2D";
+      }
+      
+      if (seconds <= 0) {
+        clearInterval(interval);
+        document.getElementById("otpDisplay").innerHTML = `
+          <div class="otp-code" style="color: #A32D2D;">EXPIRED</div>
+          <div class="otp-timer expired">⏱️ OTP has expired. Generate a new one.</div>
+        `;
+        currentOTP = "";
+        otpExpiry = null;
+        showMsg("⏰ OTP expired. Generate a new one.", "error");
+      }
+    }, 1000);
+  }
+
+  function verifyOTP() {
+    const entered = document.getElementById("passwordInput").value.trim();
+    
+    if (!currentOTP) {
+      showMsg("No OTP generated. Contact the owner.", "error");
+      return;
+    }
+    
+    if (Date.now() > otpExpiry) {
+      showMsg("OTP expired. Contact the owner for a new one.", "error");
+      return;
+    }
+    
+    if (entered === currentOTP) {
+      unlockPortfolio();
+    } else {
+      showMsg("❌ Incorrect OTP. Try again.", "error");
+    }
+  }
+
+  function unlockPortfolio() {
+    document.getElementById("gate").style.display = "none";
+    document.getElementById("portfolio").style.display = "block";
+    document.getElementById("visitorDisplay").textContent = visitorName;
+    renderSkills();
+  }
+
+  function lockPortfolio() {
+    document.getElementById("portfolio").style.display = "none";
+    document.getElementById("gate").style.display = "flex";
+    resetGate();
+  }
+
+  function resetGate() {
+    document.getElementById("step1").style.display = "block";
+    document.getElementById("step2").style.display = "none";
+    document.getElementById("visitorName").value = "";
+    document.getElementById("passwordInput").value = "";
+    document.getElementById("requestBtn").disabled = false;
+    document.getElementById("requestBtn").textContent = "Request Access";
+    showMsg("", "");
+    currentOTP = "";
+    otpExpiry = null;
+    visitorName = "";
+    document.getElementById("otpDisplay").innerHTML = `
+      <div class="otp-code">------</div>
+      <div class="otp-timer">⏱️ No OTP generated</div>
+    `;
+  }
+
+  function showMsg(text, type) {
+    const el = document.getElementById("gateMsg");
+    el.textContent = text;
+    el.className = "gate-msg " + type;
+  }
+
+  /* ══════════════════════════════════════
+     HIDDEN ADMIN PANEL (Triple-click)
+  ══════════════════════════════════════ */
+  document.addEventListener("DOMContentLoaded", function() {
+    const lockIcon = document.querySelector(".lock-icon");
+    if (lockIcon) {
+      lockIcon.addEventListener("click", function(e) {
+        clickCount++;
+        
+        clearTimeout(clickTimer);
+        clickTimer = setTimeout(() => {
+          clickCount = 0;
+        }, 500);
+        
+        if (clickCount === 3) {
+          clickCount = 0;
+          const panel = document.getElementById("adminPanel");
+          panel.classList.toggle("show");
+          if (panel.classList.contains("show")) {
+            showMsg("🔑 Admin panel activated!", "info");
+          } else {
+            showMsg("", "");
+          }
+        }
+      });
+    }
+  });
+
+  /* ══════════════════════════════════════
+     PORTFOLIO NAVIGATION
+  ══════════════════════════════════════ */
+  function showTab(id, btn) {
+    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+    document.querySelectorAll(".topbar nav button").forEach(b => b.classList.remove("active"));
+    document.getElementById("tab-" + id).classList.add("active");
+    btn.classList.add("active");
+    if (id === "skills") animateBars();
+  }
+
+  /* ══════════════════════════════════════
+     SKILLS
+  ══════════════════════════════════════ */
+  const skills = [
+    { name: "HTML / CSS",    pct: 80, label: "Comfortable" },
+    { name: "JavaScript",    pct: 65, label: "Intermediate" },
+    { name: "Python",        pct: 60, label: "Intermediate" },
+    { name: "React",         pct: 50, label: "Learning" },
+    { name: "MySQL",         pct: 70, label: "Comfortable" },
+    { name: "Git & GitHub",  pct: 65, label: "Intermediate" },
+    { name: "PHP",           pct: 55, label: "Beginner" },
+    { name: "Java",          pct: 50, label: "Beginner" },
+  ];
+
+  function renderSkills() {
+    const grid = document.getElementById("skillGrid");
+    if (grid.innerHTML) return;
+    grid.innerHTML = skills.map(s => `
+      <div class="skill-box">
+        <div class="sname">${s.name} <span>${s.label}</span></div>
+        <div class="bar-bg"><div class="bar-fill" data-w="${s.pct}%"></div></div>
+      </div>`).join("");
+  }
+
+  function animateBars() {
+    setTimeout(() => {
+      document.querySelectorAll(".bar-fill").forEach(b => b.style.width = b.dataset.w);
+    }, 60);
+  }
+
+  /* Enter key support */
+  document.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      if (document.getElementById("step2").style.display === "block") verifyOTP();
+      else if (document.getElementById("visitorName") === document.activeElement) requestAccess();
+    }
+  });
+</script>
+</body>
+</html>
